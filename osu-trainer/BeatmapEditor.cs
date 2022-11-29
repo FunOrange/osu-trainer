@@ -562,10 +562,18 @@ namespace osu_trainer
                 return;
 
             // not applicable for taiko or mania
-            if (ScaleAR && NewBeatmap.Mode != GameMode.Taiko && NewBeatmap.Mode != GameMode.Mania)
+            if (NewBeatmap.Mode != GameMode.Taiko && NewBeatmap.Mode != GameMode.Mania)
             {
-                NewBeatmap.ApproachRate = DifficultyCalculator.CalculateMultipliedAR(OriginalBeatmap, BpmRate);
-                BeatmapModified?.Invoke(this, EventArgs.Empty);
+                if (ScaleAR)
+                {
+                    NewBeatmap.ApproachRate = DifficultyCalculator.CalculateMultipliedAR(OriginalBeatmap, BpmRate);
+                    BeatmapModified?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    NewBeatmap.ApproachRate = OriginalBeatmap.ApproachRate;
+                    BeatmapModified?.Invoke(this, EventArgs.Empty);
+                }
             }
             ArIsLocked = false;
             ControlsModified?.Invoke(this, EventArgs.Empty);
@@ -581,6 +589,11 @@ namespace osu_trainer
             if (ScaleOD)
             {
                 NewBeatmap.OverallDifficulty = DifficultyCalculator.CalculateMultipliedOD(OriginalBeatmap, BpmRate);
+                BeatmapModified?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                NewBeatmap.OverallDifficulty = OriginalBeatmap.OverallDifficulty;
                 BeatmapModified?.Invoke(this, EventArgs.Empty);
             }
             OdIsLocked = false;
