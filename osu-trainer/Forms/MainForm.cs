@@ -24,7 +24,7 @@ namespace osu_trainer
         // Beatmap
         private string userSongsFolder = null;
 
-        private IOsuMemoryReader osuReader;
+        private StructuredOsuMemoryReader osuReader;
 
         // Common Control Lists
         private List<Label> dumbLabels;
@@ -103,7 +103,7 @@ namespace osu_trainer
             Hotkeys.Add(Properties.Settings.Default.HotkeyProfile4);
 
             // Init object instances
-            osuReader = OsuMemoryReader.Instance.GetInstanceForWindowTitleHint("");
+            osuReader = StructuredOsuMemoryReader.Instance.GetInstanceForWindowTitleHint("");
             editor = new BeatmapEditor(this);
 
             // Add event handlers (observers)
@@ -691,8 +691,10 @@ namespace osu_trainer
 
             // this can be cleaned up...
             // Read memory for current map
-            string beatmapFilename = osuReader.GetOsuFileName();
-            string beatmapFolder = osuReader.GetMapFolderName();
+            //string beatmapFilename = osuReader.GetOsuFileName();
+            string beatmapFilename = osuReader.OsuMemoryAddresses.Beatmap.OsuFileName;
+            //string beatmapFolder = osuReader.GetMapFolderName();
+            string beatmapFolder = osuReader.OsuMemoryAddresses.Beatmap.FolderName;
 
             var invalidChars = Path.GetInvalidPathChars();
 
@@ -742,9 +744,11 @@ namespace osu_trainer
                     Properties.Settings.Default.Save();
                 }
             }
-            int intStatus = 0;
-            osuReader.GetCurrentStatus(out intStatus);
-            OsuMemoryStatus status = (OsuMemoryStatus)intStatus;
+            //int intStatus = 0;
+            // osuReader.OsuMemoryAddresses.GeneralData.OsuStatus(out intStatus);
+            //intStatus = (int)osuReader.OsuMemoryAddresses.GeneralData.OsuStatus;
+            //OsuMemoryStatus status = (OsuMemoryStatus)intStatus;
+            OsuMemoryStatus status = (OsuMemoryStatus)osuReader.OsuMemoryAddresses.GeneralData.OsuStatus;
 
             if (status == OsuMemoryStatus.SongSelect || status == OsuMemoryStatus.MultiplayerRoom || status == OsuMemoryStatus.MultiplayerSongSelect)
                 mapSelectScreen = true;

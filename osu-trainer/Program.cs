@@ -16,8 +16,8 @@ namespace osu_trainer
         {
             try
             {
-                var updaterProc = Process.Start("updater.exe");
-                updaterProc.WaitForExit();
+                //var updaterProc = Process.Start("updater.exe");
+                //updaterProc.WaitForExit();
             }
             catch (Exception e)
             {
