@@ -28,7 +28,7 @@ namespace osu_trainer
         private string userSongsFolder = null;
 
 
-        // Note: Must StructuredOsuMemoryReader.TryRead(OsuBaseAddresses.*) to use 
+        // Note: Must StructuredOsuMemoryReader.TryRead(OsuBaseAddresses.*) to get 
         // game information
         private StructuredOsuMemoryReader osuReader;
         private OsuBaseAddresses baseAddresses;
@@ -757,7 +757,8 @@ namespace osu_trainer
 
             if (status == OsuMemoryStatus.SongSelect ||
                 status == OsuMemoryStatus.MultiplayerRoom || 
-                status == OsuMemoryStatus.MultiplayerSongSelect)
+                status == OsuMemoryStatus.MultiplayerSongSelect || 
+                status == OsuMemoryStatus.MainMenu)
                 mapSelectScreen = true;
             else
                 mapSelectScreen = false;
