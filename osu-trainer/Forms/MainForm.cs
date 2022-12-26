@@ -15,6 +15,9 @@ using System.Media;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.FSharp.Core;
+using OsuMemoryDataProvider.OsuMemoryModels;
+using ProcessMemoryDataFinder.Structured;
 using Utilities;
 
 namespace osu_trainer
@@ -25,6 +28,7 @@ namespace osu_trainer
         private string userSongsFolder = null;
 
         private StructuredOsuMemoryReader osuReader;
+        private OsuBaseAddresses baseAddresses;
 
         // Common Control Lists
         private List<Label> dumbLabels;
@@ -103,7 +107,8 @@ namespace osu_trainer
             Hotkeys.Add(Properties.Settings.Default.HotkeyProfile4);
 
             // Init object instances
-            osuReader = StructuredOsuMemoryReader.Instance.GetInstanceForWindowTitleHint("");
+            osuReader = StructuredOsuMemoryReader.Instance.GetInstanceForWindowTitleHint(null);
+            baseAddresses = new OsuBaseAddresses(); // StructuredOsuMemoryReader requires a dynamic base address object to reference
             editor = new BeatmapEditor(this);
 
             // Add event handlers (observers)
@@ -692,9 +697,14 @@ namespace osu_trainer
             // this can be cleaned up...
             // Read memory for current map
             //string beatmapFilename = osuReader.GetOsuFileName();
-            string beatmapFilename = osuReader.OsuMemoryAddresses.Beatmap.OsuFileName;
             //string beatmapFolder = osuReader.GetMapFolderName();
-            string beatmapFolder = osuReader.OsuMemoryAddresses.Beatmap.FolderName;
+
+            //var beatmapFilename = osuReader.OsuMemoryAddresses.Beatmap.OsuFileName;
+
+            osuReader.TryRead(baseAddresses.Beatmap);
+
+            var beatmapFilename = baseAddresses.Beatmap.OsuFileName;
+            var beatmapFolder = baseAddresses.Beatmap.FolderName;
 
             var invalidChars = Path.GetInvalidPathChars();
 
@@ -734,7 +744,7 @@ namespace osu_trainer
                 else if (gameLoaded == null)
                     gameLoaded = true;
 
-                if (userSongsFolder == null || userSongsFolder == "")
+                if (string.IsNullOrEmpty(userSongsFolder))
                 {
                     // Try to get osu songs folder
                     // TODO: wrap with try catch
@@ -744,13 +754,13 @@ namespace osu_trainer
                     Properties.Settings.Default.Save();
                 }
             }
-            //int intStatus = 0;
-            // osuReader.OsuMemoryAddresses.GeneralData.OsuStatus(out intStatus);
-            //intStatus = (int)osuReader.OsuMemoryAddresses.GeneralData.OsuStatus;
-            //OsuMemoryStatus status = (OsuMemoryStatus)intStatus;
-            OsuMemoryStatus status = (OsuMemoryStatus)osuReader.OsuMemoryAddresses.GeneralData.OsuStatus;
+            osuReader.TryRead(baseAddresses.GeneralData); // Need to read memory right before attempting to use
 
-            if (status == OsuMemoryStatus.SongSelect || status == OsuMemoryStatus.MultiplayerRoom || status == OsuMemoryStatus.MultiplayerSongSelect)
+            var status = baseAddresses.GeneralData.OsuStatus;
+
+            if (status == OsuMemoryStatus.SongSelect ||
+                status == OsuMemoryStatus.MultiplayerRoom || 
+                status == OsuMemoryStatus.MultiplayerSongSelect)
                 mapSelectScreen = true;
             else
                 mapSelectScreen = false;
@@ -1082,5 +1092,6 @@ namespace osu_trainer
         private void spectrogramButton_Click(object sender, EventArgs e)
         {
         }
+
     }
 }
