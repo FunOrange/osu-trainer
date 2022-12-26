@@ -183,3 +183,4 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 o!RA Locale Generator/GlobalVars.cs
+/osu-trainer/submodules/globalKeyboardHook/key preview.csproj
