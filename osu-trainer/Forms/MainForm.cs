@@ -27,6 +27,9 @@ namespace osu_trainer
         // Beatmap
         private string userSongsFolder = null;
 
+
+        // Note: Must StructuredOsuMemoryReader.TryRead(OsuBaseAddresses.*) to use 
+        // game information
         private StructuredOsuMemoryReader osuReader;
         private OsuBaseAddresses baseAddresses;
 
@@ -694,13 +697,7 @@ namespace osu_trainer
             if (gameLoaded == false || gameLoaded == null || !mapSelectScreen || editor.State == EditorState.GENERATING_BEATMAP)
                 return;
 
-            // this can be cleaned up...
             // Read memory for current map
-            //string beatmapFilename = osuReader.GetOsuFileName();
-            //string beatmapFolder = osuReader.GetMapFolderName();
-
-            //var beatmapFilename = osuReader.OsuMemoryAddresses.Beatmap.OsuFileName;
-
             osuReader.TryRead(baseAddresses.Beatmap);
 
             var beatmapFilename = baseAddresses.Beatmap.OsuFileName;
@@ -754,8 +751,8 @@ namespace osu_trainer
                     Properties.Settings.Default.Save();
                 }
             }
-            osuReader.TryRead(baseAddresses.GeneralData); // Need to read memory right before attempting to use
-
+            // Attempt memory read right before using
+            osuReader.TryRead(baseAddresses.GeneralData);
             var status = baseAddresses.GeneralData.OsuStatus;
 
             if (status == OsuMemoryStatus.SongSelect ||
