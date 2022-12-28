@@ -85,18 +85,22 @@ namespace osu_trainer
             int q = Convert.ToInt32(value * (1 - f * saturation));
             int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
 
-            if (hi == 0)
-                return Color.FromArgb(255, v, t, p);
-            else if (hi == 1)
-                return Color.FromArgb(255, q, v, p);
-            else if (hi == 2)
-                return Color.FromArgb(255, p, v, t);
-            else if (hi == 3)
-                return Color.FromArgb(255, p, q, v);
-            else if (hi == 4)
-                return Color.FromArgb(255, t, p, v);
-            else
-                return Color.FromArgb(255, v, p, q);
+            // please use switches bro it's more uptimized than a bunch of nested if statements
+            switch (hi)
+            {
+                case 0:
+                    return Color.FromArgb(255, v, t, p);
+                case 1:
+                    return Color.FromArgb(255, q, v, p);
+                case 2:
+                    return Color.FromArgb(255, p, v, t);
+                case 3:
+                    return Color.FromArgb(255, p, q, v);
+                case 4:
+                    return Color.FromArgb(255, t, p, v);
+                default:
+                    return Color.FromArgb(255, v, p, q);
+            }
         }
 
         public static Color LerpColor(Color StartColor, Color EndColor, decimal Progress)
