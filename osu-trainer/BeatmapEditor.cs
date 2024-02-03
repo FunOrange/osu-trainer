@@ -690,7 +690,10 @@ namespace osu_trainer
             if (BpmRate == multiplier)
                 return;
             if (multiplier < 0.1M)
+            {
                 BeatmapModified?.Invoke(this, EventArgs.Empty); // reject this value and revert view
+                return;
+            }
 
             BpmRate = multiplier;
 
