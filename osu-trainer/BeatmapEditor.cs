@@ -825,7 +825,7 @@ namespace osu_trainer
             if (preDT)
             {
                 string bpm = map.Bpm.ToString("0");
-                map.Version += $" {multiplier:0.##}x ({bpm}bpm)";
+                map.Version += $" {multiplier:0.##}x";
                 map.AudioFilename = $"{Path.GetFileNameWithoutExtension(map.AudioFilename)} {multiplier:0.000}x withDT";
                 if (changePitch && Math.Abs(multiplier - 1M) > 0.001M)
                     map.AudioFilename += $" (pitch {(multiplier < 1 ? "lowered" : "raised")})";
@@ -859,7 +859,6 @@ namespace osu_trainer
             if (NewBeatmap.OverallDifficulty != GetScaledOD() || NewBeatmap.OverallDifficulty > 10M)
                 HPCSAROD += $" OD{NewBeatmap.OverallDifficulty:0.#}";
 
-            map.Version += HPCSAROD;
 
             //if (NoSpinners)
             //    map.Version += " nospin";
