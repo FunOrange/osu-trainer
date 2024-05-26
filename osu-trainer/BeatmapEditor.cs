@@ -840,6 +840,7 @@ namespace osu_trainer
                     map.AudioFilename += $" (pitch {(multiplier < 1 ? "lowered" : "raised")})";
                 map.AudioFilename += ".mp3";
             }
+            map.AudioFilename = map.AudioFilename.Trim();
 
             // Difficulty Name - Difficulty Settings
             string HPCSAROD = "";
