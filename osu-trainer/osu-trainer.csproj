@@ -180,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BeatmapEditor.cs" />
+    <Compile Include="ODCalculators\ODCalculator.cs" />
     <Compile Include="Colors.cs" />
     <Compile Include="Controls\AdvancedControl.cs">
       <SubType>Component</SubType>

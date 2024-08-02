@@ -420,6 +420,7 @@ namespace osu_trainer
 
             enabled = (editor.State != EditorState.NOT_READY);
             ODSlider.Enabled = enabled;
+            ODSlider.MaxValue = editor.GetMode() == GameMode.Mania ? 10 : 11; // od higher than 10 is invalid for o!m since it doesn't scaled with dt
             ODDisplay.Enabled = enabled ? true : false;
             ODDisplay.BackColor = enabled ? Colors.ReadOnlyBg : SystemColors.ControlDark;
             ODDisplay.ForeColor = Colors.ReadOnlyFg;

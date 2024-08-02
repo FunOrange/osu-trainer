@@ -1,14 +1,11 @@
 ﻿using FsBeatmapProcessor;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using osu_trainer.ODCalculators;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace osu_trainer
 {
@@ -17,7 +14,9 @@ namespace osu_trainer
         static string tempBeatmapPath = "temp.osu";
         static Semaphore diffCalcInProgress;
 
-        static DifficultyCalculator() {
+
+        static DifficultyCalculator()
+        {
             diffCalcInProgress = new Semaphore(1, 1);
         }
 
@@ -55,14 +54,27 @@ namespace osu_trainer
         }
         public static decimal CalculateMultipliedOD(Beatmap map, decimal BpmMultiplier)
         {
-            decimal newbpmMs = OverallDifficultyToMs(map.OverallDifficulty) / BpmMultiplier;
-            decimal newbpmOD = MsToOverallDifficulty(newbpmMs);
+            decimal newbpmMs = OverallDifficultyToMs(map.OverallDifficulty, map.Mode)/ BpmMultiplier;
+            decimal newbpmOD = MsToOverallDifficulty(newbpmMs, map.Mode);
             newbpmOD = (decimal)Math.Round(newbpmOD * 10.0M) / 10.0M;
-            newbpmOD = JunUtils.Clamp(newbpmOD, 0, 11);
+            newbpmOD = JunUtils.Clamp(newbpmOD, 0, map.Mode == GameMode.Mania ? 10 : 11);
             return newbpmOD;
         }
-        private static decimal OverallDifficultyToMs(decimal od) => -6.0M * od + 79.5M;
-        private static decimal MsToOverallDifficulty(decimal ms) => (79.5M - ms) / 6.0M;
+        private static decimal OverallDifficultyToMs(decimal od, GameMode mode)
+        {
+            ODCalculator odCalculator = ODCalculator.GetCalculatorForGamemode(mode);
+            return odCalculator.OverallDifficultyToMs(od);
+        }
+
+
+
+        private static decimal MsToOverallDifficulty(decimal ms, GameMode mode)
+        {
+
+            ODCalculator odCalculator = ODCalculator.GetCalculatorForGamemode(mode);
+            return odCalculator.MsToOverallDifficulty(ms);
+        }
+
         public static (decimal, decimal, decimal) CalculateStarRating(Beatmap map)
         {
             if (map == null)
@@ -109,8 +121,8 @@ namespace osu_trainer
                 Console.WriteLine("Could not calculate difficulty");
                 return (0, 0, 0);
             }
-            decimal stars      = oppaiData.GetValue("stars").ToObject<decimal>();
-            decimal aimStars   = oppaiData.GetValue("aim_stars").ToObject<decimal>();
+            decimal stars = oppaiData.GetValue("stars").ToObject<decimal>();
+            decimal aimStars = oppaiData.GetValue("aim_stars").ToObject<decimal>();
             decimal speedStars = oppaiData.GetValue("speed_stars").ToObject<decimal>();
 
 
