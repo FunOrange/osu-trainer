@@ -829,7 +829,7 @@ namespace osu_trainer
                 map.AudioFilename = $"{Path.GetFileNameWithoutExtension(map.AudioFilename)} {multiplier:0.000}x withDT";
                 if (changePitch && Math.Abs(multiplier - 1M) > 0.001M)
                     map.AudioFilename += $" (pitch {(multiplier < 1 ? "lowered" : "raised")})";
-                map.AudioFilename += ".mp3";
+                map.AudioFilename += ".ogg";
             }
             else if (Math.Abs(multiplier - 1M) > 0.001M)
             {
@@ -838,7 +838,7 @@ namespace osu_trainer
                 map.AudioFilename = $"{Path.GetFileNameWithoutExtension(map.AudioFilename)} {multiplier:0.000}x";
                 if (changePitch)
                     map.AudioFilename += $" (pitch {(multiplier < 1 ? "lowered" : "raised")})";
-                map.AudioFilename += ".mp3";
+                map.AudioFilename += ".ogg";
             }
 
             // Difficulty Name - Difficulty Settings

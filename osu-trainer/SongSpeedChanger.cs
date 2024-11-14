@@ -4,6 +4,8 @@ using System.IO;
 using NAudio.Wave;
 using NAudio.Lame;
 using NAudio.Vorbis;
+using FFMpegCore;
+using FFMpegCore.Enums;
 
 namespace osu_trainer
 {
@@ -20,23 +22,49 @@ namespace osu_trainer
 
             File.Copy(inFile, temp1);
 
-            // mp3/ogg => wav
-            if (ext.ToLower() == ".mp3")
+            // proper determination of file formats (at least more proper then file extensions
+            
+            uint OggHeader = 0x4F676753; // <- Required Ogg Header
+            uint Mp3Header = 0x49443303; // <- Rare MP3 Header
+
+            uint BigHeader, LittleHeader;
+            using (var reader = new BinaryReader(File.Open(temp1, FileMode.Open, FileAccess.Read)))
+            {
+                byte[] bytes = reader.ReadBytes(4);
+
+                BigHeader = BitConverter.ToUInt32(bytes,0);
+
+                Array.Reverse(bytes);
+                LittleHeader = BitConverter.ToUInt32(bytes,0);
+
+            }
+
+            if (BigHeader == OggHeader || LittleHeader == OggHeader)
+            {
+                using (VorbisWaveReader vorbis = new VorbisWaveReader(temp1))
+                    WaveFileWriter.CreateWaveFile(temp2, vorbis.ToWaveProvider16());
+            }
+            // this is useless kinda
+            else if (BigHeader == Mp3Header || LittleHeader == Mp3Header)
             {
                 using (Mp3FileReader mp3 = new Mp3FileReader(temp1))
                 using (WaveStream wav = WaveFormatConversionStream.CreatePcmStream(mp3))
                     WaveFileWriter.CreateWaveFile(temp2, wav);
             }
-            else if (ext.ToLower() == ".ogg")
-            {
-                using (VorbisWaveReader vorbis = new VorbisWaveReader(temp1))
-                    WaveFileWriter.CreateWaveFile(temp2, vorbis.ToWaveProvider16());
-            }
             else
             {
-                throw new Exception($"audio file not supported: {ext}");
+                try
+                {
+                    using (Mp3FileReader mp3 = new Mp3FileReader(temp1))
+                    using (WaveStream wav = WaveFormatConversionStream.CreatePcmStream(mp3))
+                        WaveFileWriter.CreateWaveFile(temp2, wav);
+                }
+                catch
+                {
+                    throw new Exception($"audio file not supported: {ext}");
+                }
             }
-
+            
 
             // stretch (or speed up) wav
             string quick = highQuality ? "" : "-quick";
@@ -59,13 +87,15 @@ namespace osu_trainer
             soundstretch.WaitForExit();
 
 
-            // wav => mp3
-            if (File.Exists(outFile))
-                File.Delete(outFile);
-            using (var wav = new WaveFileReader(temp3))
-            using (var mp3 = new LameMP3FileWriter(outFile, wav.WaveFormat, highQuality ? LAMEPreset.STANDARD : LAMEPreset.MEDIUM))
-                wav.CopyTo(mp3);
-
+            // wav => ogg for better timing alignment and preservation of quality (might create bloat but its w/e)
+            FFMpegArguments
+                .FromFileInput(temp3)
+                .OutputToFile(outFile, true, options => options
+                    .WithAudioCodec(AudioCodec.LibVorbis)
+                    .WithAudioSamplingRate(44100)
+                    .WithAudioBitrate(highQuality ? AudioQuality.Good : AudioQuality.Normal) // 128kbps <> 192kbps
+                    )
+                .ProcessSynchronously();
 
             // Clean up
             try
